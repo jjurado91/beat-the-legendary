@@ -1,0 +1,666 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+
+
+<title>Beat the Legendary</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f4f1e8;--panel:#fffdf7;--ink:#1d1b26;--muted:#7a7685;--line:#1d1b26;
+  --accent:#e2453c;--accent-ink:#fff;--bar:#c9c4d3;--good:#2fbf5b;--warn:#e2a33c;--shadow:#1d1b26;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#16151c;--panel:#22202b;--ink:#efeaf7;--muted:#9a95a8;--line:#efeaf7;
+  --accent:#ff5a4f;--accent-ink:#16151c;--bar:#4a4657;--good:#3ee070;--shadow:#000;
+}}
+:root[data-theme="dark"]{
+  --bg:#16151c;--panel:#22202b;--ink:#efeaf7;--muted:#9a95a8;--line:#efeaf7;
+  --accent:#ff5a4f;--accent-ink:#16151c;--bar:#4a4657;--good:#3ee070;--shadow:#000;
+}
+*{box-sizing:border-box;margin:0}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:"Press Start 2P",monospace;font-size:12px;line-height:1.5;
+  display:flex;justify-content:center;overflow-x:hidden;-webkit-tap-highlight-color:transparent}
+#app{width:100%;max-width:960px;min-height:100%;padding:16px;display:flex;flex-direction:column}
+.screen{display:none;flex:1;flex-direction:column;align-items:center;justify-content:center;gap:20px;text-align:center}
+.screen.on{display:flex}
+img.px{image-rendering:pixelated}
+.btn{font:inherit;font-size:12px;color:var(--ink);background:var(--panel);border:3px solid var(--line);
+  box-shadow:4px 4px 0 var(--shadow);padding:12px 16px;cursor:pointer;transition:transform .05s,box-shadow .05s}
+.btn:hover:not(:disabled){transform:translate(-1px,-1px);box-shadow:5px 5px 0 var(--shadow)}
+.btn:active:not(:disabled){transform:translate(3px,3px);box-shadow:1px 1px 0 var(--shadow)}
+.btn:disabled{opacity:.3;cursor:not-allowed;box-shadow:none}
+.btn.primary{background:var(--accent);color:var(--accent-ink)}
+.row{display:flex;gap:16px;flex-wrap:wrap;justify-content:center}
+
+/* home */
+#home{gap:16px;justify-content:flex-start}
+h1{font-size:clamp(22px,6.5vw,44px);letter-spacing:2px;text-shadow:4px 4px 0 var(--accent);margin-top:8px}
+.rules{max-width:540px;color:var(--muted);font-size:min(10px,calc((100vw - 32px)/42));line-height:2;min-height:4em}
+.rules b{color:var(--ink)}
+.seg{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.seg .btn{font-size:10px;padding:10px 12px;box-shadow:3px 3px 0 var(--shadow)}
+.seg .btn.on{background:var(--ink);color:var(--bg)}
+.lbl{font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:-8px}
+.boss{width:200px;padding:12px;gap:6px}
+.boss .spr,.boss .spr img{width:120px;height:120px}
+.boss .bst{font-size:9px;color:var(--muted)}
+.gens{display:grid;grid-template-columns:repeat(9,1fr);gap:4px;width:100%;max-width:520px}
+.gen{display:flex;flex-direction:column;align-items:center;gap:0;padding:2px 0 4px;font-size:7px;border-width:2px;
+  box-shadow:2px 2px 0 var(--shadow);min-width:0;white-space:nowrap;transition:opacity .25s,filter .25s,transform .05s,box-shadow .05s}
+.gen img{width:36px;height:36px}
+.gen.off{opacity:.28;filter:grayscale(1);box-shadow:none;transform:translate(2px,2px)}
+.gen.off:hover:not(:disabled){transform:translate(2px,2px);box-shadow:none}
+.warn{font-size:9px;color:var(--accent);min-height:1.5em}
+
+/* card */
+.card{background:var(--panel);border:3px solid var(--line);box-shadow:6px 6px 0 var(--shadow);
+  width:260px;padding:16px;display:flex;flex-direction:column;align-items:center;gap:10px;flex:none}
+.card .spr{width:144px;height:144px;display:flex;align-items:center;justify-content:center}
+.card .spr img{width:144px;height:144px}
+.card .name{font-size:11px;min-height:2.6em;display:flex;align-items:center}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%}
+.stats .btn{padding:10px 4px;font-size:10px;box-shadow:3px 3px 0 var(--shadow)}
+.btn.sel{background:var(--accent);color:var(--accent-ink)}
+.btn.taken:not(.sel){color:var(--muted);border-style:dashed}
+.topbar{display:flex;justify-content:space-between;align-items:center;width:100%;font-size:10px;color:var(--muted)}
+.topbar .btn{font-size:10px;padding:8px 10px;box-shadow:3px 3px 0 var(--shadow)}
+
+/* modern mode */
+.chips{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;min-height:36px}
+.chip{display:flex;align-items:center;gap:4px;border:2px solid var(--line);background:var(--panel);padding:2px 6px 2px 2px;font-size:8px}
+.chip img{width:28px;height:28px}
+.chip.empty{border-style:dashed;color:var(--muted);padding:2px 8px;height:36px}
+.srows{display:flex;flex-direction:column;gap:10px;width:100%;max-width:440px}
+.srow{display:flex;align-items:center;gap:12px;width:100%;padding:4px 12px 4px 4px;text-align:left}
+.srow .badge{width:56px;flex:none;text-align:center;font-size:12px;color:var(--accent)}
+.srow img{width:56px;height:56px;flex:none}
+.srow span{font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pop{animation:pop .25s ease-out}
+@keyframes pop{from{transform:translateY(8px);opacity:0}to{transform:none;opacity:1}}
+
+/* coverflow */
+.flow{--w:260px;width:100%;display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:0;padding:24px 0;position:relative;
+  perspective:900px;scrollbar-width:none}
+.flow.bf{--w:200px;padding:8px 0 16px}
+.flow::-webkit-scrollbar{display:none}
+.flow .spacer{flex:none;width:calc(50% - var(--w)/2)}
+.flow .slot{scroll-snap-align:center;flex:none;width:var(--w);display:flex;justify-content:center}
+.flow .card{transition:transform .15s ease-out,opacity .15s;will-change:transform}
+.bf .card{cursor:pointer}
+.dots{display:flex;gap:8px}
+.dots i{width:12px;height:12px;border:2px solid var(--line);cursor:pointer}
+.dots i.done{background:var(--accent)}
+.dots i.cur{outline:2px solid var(--accent);outline-offset:2px}
+.navs{display:flex;gap:12px;align-items:center}
+
+/* modal */
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;padding:16px;z-index:10}
+.modal.on{display:flex}
+.modal .box{background:var(--panel);border:3px solid var(--line);box-shadow:6px 6px 0 var(--shadow);padding:20px;max-width:360px;
+  display:flex;flex-direction:column;gap:20px;text-align:center;font-size:11px;line-height:2}
+
+/* powerups */
+.pu{display:flex;flex-direction:column;align-items:center;gap:14px}
+.pu .row{gap:12px}
+.rr{font-size:9px;padding:8px 12px;box-shadow:3px 3px 0 var(--shadow)}
+.srow .val{margin-left:auto;font-size:12px;color:var(--accent)}
+.rrm{color:var(--accent)}
+/* tooltip */
+.tip{position:absolute;z-index:20;display:none;pointer-events:none;background:var(--ink);color:var(--bg);font-size:9px;
+  padding:6px 8px;white-space:nowrap;box-shadow:3px 3px 0 var(--accent)}
+[data-tip]{cursor:pointer}
+
+/* result */
+.verdict{font-size:clamp(18px,5vw,28px)}
+.score{font-size:clamp(12px,3.5vw,16px);margin-top:-8px}
+.optn{font-size:9px;color:var(--muted);margin-top:-12px}
+.verdict.win{color:var(--good)}.verdict.lose{color:var(--accent)}
+.sub{font-size:10px;color:var(--muted)}
+
+/* breakdown */
+.grid{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:repeat(3,auto);gap:12px;width:100%}
+.bd{background:var(--panel);border:3px solid var(--line);padding:8px;display:flex;gap:8px;align-items:center;text-align:left;min-width:0}
+.bd img{width:64px;height:64px;flex:none}
+.bd .nm{font-size:9px;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bars{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+.bar{display:grid;grid-template-columns:34px 1fr 28px;align-items:center;gap:6px;font-size:8px}
+.bar .tr{height:9px;position:relative}
+.bar .fl{height:100%;background:var(--bar)}
+.bar.pick .fl{background:var(--accent)}
+.bar.pick{color:var(--accent)}
+.bar.opt .fl{box-shadow:0 0 0 2px var(--good),0 0 8px 2px var(--good)}
+.legend{display:flex;gap:16px;font-size:9px;color:var(--muted);flex-wrap:wrap;justify-content:center}
+.legend span::before{content:"";display:inline-block;width:12px;height:8px;margin-right:6px;vertical-align:middle}
+.legend .lp::before{background:var(--accent)}
+.legend .lo::before{background:var(--bar);box-shadow:0 0 0 2px var(--good),0 0 6px 1px var(--good)}
+.legend .lu::before{background:var(--bar);opacity:.3}
+/* select breakdown: rounds × stats */
+.sg{display:grid;grid-template-columns:28px repeat(6,1fr);gap:4px;width:100%;max-width:620px}
+.sg .h{font-size:8px;color:var(--muted);display:flex;align-items:center;justify-content:center;padding:4px 0}
+.sc{background:var(--panel);border:2px solid var(--line);display:flex;flex-direction:column;align-items:center;padding:2px 0 4px;font-size:9px;min-width:0}
+.sc img{width:40px;height:40px}
+.sc.un{opacity:.28;border-style:dashed}
+.sc.pick{background:var(--accent);color:var(--accent-ink);opacity:1}
+.sc.opt{box-shadow:0 0 0 3px var(--good),0 0 10px 2px var(--good);opacity:1}
+@media (max-width:560px){
+  .bd{flex-direction:column;align-items:stretch}.bd img{align-self:center;width:48px;height:48px}
+  .bar{grid-template-columns:28px 1fr 22px;gap:4px;font-size:7px}
+  .sg{grid-template-columns:22px repeat(6,1fr);gap:3px}.sc img{width:32px;height:32px}.sc{font-size:8px}
+}
+</style>
+
+<div id="app">
+
+  <section class="screen on" id="home">
+    <h1 id="title">Beat Arceus</h1>
+    <div class="flow bf" id="bossFlow"></div>
+    <div class="dots" id="bossDots"></div>
+    <div class="lbl">MODE</div>
+    <div class="seg" id="modeSeg">
+      <button class="btn" data-gm="classic">Classic</button>
+      <button class="btn" data-gm="select">Modern</button>
+    </div>
+    <p class="rules" id="rules"></p>
+    <div class="lbl">DIFFICULTY</div>
+    <div class="seg" id="diffSeg">
+      <button class="btn" data-df="easy">Easy</button>
+      <button class="btn" data-df="hard">Hard</button>
+    </div>
+    <p class="sub" id="diffNote"></p>
+    <div class="lbl">GENERATIONS</div>
+    <div class="gens" id="genRow"></div>
+    <p class="warn" id="genNote"></p>
+    <button class="btn primary" id="play" style="font-size:14px;padding:14px 28px">Play</button>
+  </section>
+
+  <section class="screen" id="game">
+    <div class="topbar"><button class="btn" id="quitGame">Quit</button><span id="progress"></span></div>
+    <div id="stage" style="width:100%;display:flex;flex-direction:column;align-items:center;gap:20px"></div>
+  </section>
+
+  <section class="screen" id="breakdown" style="justify-content:flex-start">
+    <div class="verdict" id="rVerdict"></div>
+    <div class="score" id="rScore"></div>
+    <div class="optn" id="rOpt"></div>
+    <div id="bBody" style="width:100%;display:flex;flex-direction:column;align-items:center;gap:16px"></div>
+    <div class="legend" id="bLegend"></div>
+    <div class="row"><button class="btn" id="quit">Home</button><button class="btn primary" id="again">Play again</button></div>
+  </section>
+</div>
+
+<div class="tip" id="tip"></div>
+<div class="modal" id="modal"><div class="box"><p id="mText"></p>
+  <div class="row"><button class="btn" id="mNo">Cancel</button><button class="btn primary" id="mYes">Switch</button></div></div></div>
+
+<script src="pokemon-data.js"></script>
+<script src="sprites-data.js"></script>
+<script>
+"use strict";
+/* ---------- engine (shared by page + tests) ---------- */
+const MARGIN = 15;
+const PERMS = (()=>{ const out=[]; (function go(p,used){ if(p.length===6){out.push(p.slice());return;}
+  for(let s=0;s<6;s++) if(!(used>>s&1)){ p.push(s); go(p,used|1<<s); p.pop(); } })([],0); return out; })();
+// V[row][stat] → best one-stat-per-row assignment
+function solve(V){
+  let best=-1, bi=0;
+  for (let k=0;k<PERMS.length;k++){ const p=PERMS[k]; const v=V[0][p[0]]+V[1][p[1]]+V[2][p[2]]+V[3][p[3]]+V[4][p[4]]+V[5][p[5]]; if(v>best){best=v;bi=k;} }
+  return {score:best, assign:PERMS[bi].slice()};
+}
+const gapFor = T => o => o<=T ? T+1-o : o>T+MARGIN ? o-T-MARGIN : 0;
+
+/* Classic + Stat: 6 Pokémon, each row uses the same Pokémon for every stat.
+   Draw at random, then repair weakest-first (strongest-first if over) until optimum lands in (T, T+15]. */
+function drawTeam(pool, T, budgetMs=1500){
+  if (pool.length<6) return null;
+  const t0=Date.now(), gap=gapFor(T), rnd=()=>pool[Math.random()*pool.length|0];
+  const mat = team => team.map(p=>p.s);
+  for (let restart=0;Date.now()-t0<budgetMs;restart++){
+    const team=[], ids=new Set();
+    while (team.length<6){ const p=rnd(); if(!ids.has(p.id)){ ids.add(p.id); team.push(p); } }
+    let o=solve(mat(team)), g=gap(o.score), level=0, tries=0, it=0;
+    while (g>0 && it++<4000){
+      const under=o.score<=T, val=i=>team[i].s[o.assign[i]];
+      const order=[0,1,2,3,4,5].sort((a,b)=> under ? val(a)-val(b) : val(b)-val(a));
+      const slot=order[level]; let c; do c=rnd(); while(ids.has(c.id));
+      const t2=team.slice(); t2[slot]=c; const o2=solve(mat(t2)), g2=gap(o2.score);
+      if (g2<g){ ids.delete(team[slot].id); ids.add(c.id); team[slot]=c; o=o2; g=g2; level=0; tries=0; }
+      else if (++tries>=40){ tries=0; level=(level+1)%6; }
+    }
+    if (g===0) return {team, opt:o};
+  }
+  return null;
+}
+
+/* Select: grid[round][stat] = the Pokémon offered for that stat in that round (36 distinct).
+   A run = picking one stat per round, so the optimum is the same assignment problem with rows = rounds.
+   Offers are fixed up front, so whatever order the player picks in, the same Pokémon appear for each stat/round. */
+function drawSelect(pool, T, budgetMs=1500){
+  if (pool.length<36) return null;
+  const t0=Date.now(), gap=gapFor(T), rnd=()=>pool[Math.random()*pool.length|0];
+  const mat = G => G.map((row)=>row.map((p,s)=>p.s[s]));
+  while (Date.now()-t0<budgetMs){
+    const ids=new Set(), G=[];
+    for (let r=0;r<6;r++){ G.push([]); for (let s=0;s<6;s++){ let p; do p=rnd(); while(ids.has(p.id)); ids.add(p.id); G[r].push(p); } }
+    let o=solve(mat(G)), g=gap(o.score), level=0, tries=0, it=0;
+    while (g>0 && it++<6000){
+      const under=o.score<=T; let cells;
+      if (under) cells=[0,1,2,3,4,5].map(r=>[r,o.assign[r]]).sort((a,b)=>G[a[0]][a[1]].s[a[1]]-G[b[0]][b[1]].s[b[1]]);
+      else { cells=[]; for(let r=0;r<6;r++) for(let s=0;s<6;s++) cells.push([r,s]); cells.sort((a,b)=>G[b[0]][b[1]].s[b[1]]-G[a[0]][a[1]].s[a[1]]); cells=cells.slice(0,12); }
+      const [r,s]=cells[level%cells.length]; let c; do c=rnd(); while(ids.has(c.id));
+      const old=G[r][s]; G[r][s]=c; const o2=solve(mat(G)), g2=gap(o2.score);
+      if (g2<g){ ids.delete(old.id); ids.add(c.id); o=o2; g=g2; level=0; tries=0; }
+      else { G[r][s]=old; if (++tries>=30){ tries=0; level++; } }
+    }
+    if (g===0) return {grid:G, opt:o};
+  }
+  return null;
+}
+
+/* ---------- reroll ---------- */
+// best total when some rows are already locked to a stat (fixed[row] = stat | null)
+function solveFixed(V, fixed){
+  return solve(V.map((row,i)=> fixed[i]==null ? row : row.map((v,s)=> s===fixed[i] ? v : -1e4)));
+}
+function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.random()*(i+1)|0; [a[i],a[j]]=[a[j],a[i]]; } return a; }
+
+/* Classic: replace team[slot]. Must keep a win reachable given locked picks (hard mode),
+   and keeps the overall optimum in (T, T+15] when it can. Scans the pool in random order (fresh first). */
+function rerollTeam(team, slot, fixed, pools, T, hiddenFrom=6, budgetMs=600){
+  const gap=gapFor(T), ids=new Set(team.map(p=>p.id)), seen=new Set();
+  const cands=[]; for (const pool of pools) for (const p of shuffle(pool.slice())) if(!ids.has(p.id)&&!seen.has(p.id)){ seen.add(p.id); cands.push(p); }
+  let best=null, bk=null;
+  for (const c of cands){
+    const t2=team.slice(); t2[slot]=c; const V=t2.map(p=>p.s);
+    const full=solve(V), con=solveFixed(V,fixed).score;
+    const k=[con>T?0:T+1-con, gap(full.score)];
+    if (k[0]===0 && k[1]===0) return {team:t2, opt:full, sure:true};
+    if (!bk || k[0]<bk[0] || (k[0]===bk[0] && k[1]<bk[1])){ bk=k; best={team:t2, opt:full, sure:k[0]===0}; }
+  }
+  // Hard mode: cards after `slot` haven't been shown yet. If no single swap keeps a win reachable,
+  // also re-deal those unseen cards (hill-climb) so the reroll never takes away a winnable game.
+  if (!best.sure && hiddenFrom<6){
+    const t0=Date.now(), slots=[slot]; for(let k=hiddenFrom;k<6;k++) slots.push(k);
+    const locked=new Set(team.filter((_,i)=>!slots.includes(i)).map(p=>p.id));
+    const avail=cands.filter(p=>!locked.has(p.id));
+    while (Date.now()-t0<budgetMs && !best.sure){
+      const used=new Set(), rnd=()=>{ let p; do p=avail[Math.random()*avail.length|0]; while(used.has(p.id)); used.add(p.id); return p; };
+      const t2=team.map((p,i)=> slots.includes(i) ? rnd() : p);
+      const ev=()=>{ const V=t2.map(p=>p.s), full=solve(V), con=solveFixed(V,fixed); return {full,con,k:[con.score>T?0:T+1-con.score, gap(full.score)]}; };
+      let cur=ev(), it=0;
+      while ((cur.k[0]>0||cur.k[1]>0) && it++<1500){
+        const i=slots[Math.random()*slots.length|0], old=t2[i], c=rnd(); t2[i]=c; const nx=ev();
+        if (nx.k[0]<cur.k[0] || (nx.k[0]===cur.k[0] && nx.k[1]<cur.k[1])){ used.delete(old.id); cur=nx; } else { t2[i]=old; used.delete(c.id); }
+      }
+      if (cur.k[0]<bk[0] || (cur.k[0]===bk[0] && cur.k[1]<bk[1])){ bk=cur.k; best={team:t2.slice(), opt:cur.full, sure:cur.k[0]===0}; }
+    }
+  }
+  return best;
+}
+
+/* Modern: re-deal round r's offers (and the unseen future rounds) so that, given the stats
+   already locked in rounds < r, a win is still reachable; also keep the grid optimum in (T, T+15] when it can. */
+function rerollSelect(grid, r, sel, pools, T, budgetMs=900){
+  const gapF=gapFor(T), t0=Date.now();
+  const fixed=[0,1,2,3,4,5].map(k=> k<r ? sel[k] : null);
+  const banned=new Set(grid.flat().map(p=>p.id));         // never re-offer anything already dealt
+  const avail=[]; const seen=new Set();
+  for (const pool of pools) for (const p of pool) if(!banned.has(p.id)&&!seen.has(p.id)){ seen.add(p.id); avail.push(p); }
+  if (avail.length < (6-r)*6+12) return null;
+  const mat=G=>G.map(row=>row.map((p,s)=>p.s[s]));
+  let best=null, bk=null;
+  for (let phase=0; phase<2; phase++){                    // phase 0: win reachable AND optimum in window; phase 1: win reachable
+    const phaseEnd = t0 + budgetMs*(phase+1)/2;
+    while (Date.now()<phaseEnd){
+      const used=new Set(), rnd=()=>{ let p; do p=avail[Math.random()*avail.length|0]; while(used.has(p.id)); used.add(p.id); return p; };
+      const G=grid.map((row,k)=> k<r ? row.slice() : row.map(()=>rnd()));
+      const score=()=>{ const M=mat(G), full=solve(M), con=solveFixed(M,fixed);
+        const gc=con.score>T?0:T+1-con.score, gf=gapF(full.score); return {full,con,gc,gf,g: phase===0 ? gc+gf : gc}; };
+      let cur=score(), level=0, tries=0, it=0;
+      while (cur.g>0 && it++<3000 && Date.now()<phaseEnd){
+        let cells;
+        if (cur.gc>0) cells=[0,1,2,3,4,5].filter(k=>k>=r).map(k=>[k,cur.con.assign[k]]).sort((a,b)=>G[a[0]][a[1]].s[a[1]]-G[b[0]][b[1]].s[b[1]]);
+        else { cells=[]; for(let k=r;k<6;k++) for(let s=0;s<6;s++) cells.push([k,s]); cells.sort((a,b)=>G[b[0]][b[1]].s[b[1]]-G[a[0]][a[1]].s[a[1]]); cells=cells.slice(0,12); }
+        const [k,s]=cells[level%cells.length], old=G[k][s], c=rnd(); G[k][s]=c;
+        const nx=score();
+        if (nx.g<cur.g){ used.delete(old.id); cur=nx; level=0; tries=0; }
+        else { G[k][s]=old; used.delete(c.id); if(++tries>=30){ tries=0; level++; } }
+      }
+      const key=[cur.gc,cur.gf];
+      if (!bk || key[0]<bk[0] || (key[0]===bk[0]&&key[1]<bk[1])){ bk=key; best={grid:G, opt:cur.full, sure:cur.gc===0}; }
+      if (cur.g===0) return best;
+    }
+  }
+  return best;
+}
+
+const STATS = ["HP","Atk","Def","SpA","SpD","Spe"];
+const BOSSES = [
+  {id:493, name:"Arceus", bst:720},
+  {id:150, name:"Mewtwo", bst:680},
+  {id:386, name:"Deoxys", bst:600},
+];
+// last national-dex id of each generation; icon = highest-BST legendary introduced in that gen
+const GENS = [
+  {hi:151,  icon:150},  // Mewtwo 680
+  {hi:251,  icon:249},  // Lugia 680
+  {hi:386,  icon:384},  // Rayquaza 680
+  {hi:493,  icon:493},  // Arceus 720
+  {hi:649,  icon:643},  // Reshiram 680
+  {hi:721,  icon:716},  // Xerneas 680
+  {hi:809,  icon:791},  // Solgaleo 680
+  {hi:905,  icon:890},  // Eternatus 690
+  {hi:1025, icon:1007}, // Koraidon 670
+];
+const genOf = id => GENS.findIndex(g=>id<=g.hi);
+const SPRITE = id => window.SPRITES && window.SPRITES[id] ? "data:image/png;base64,"+window.SPRITES[id] : `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`;
+const POOL = window.POKEMON.map(([id,name,...s]) => ({id,name,s}));
+const IMG = (id,alt="") => `<img class="px" alt="${alt}" src="${SPRITE(id)}" onerror="this.style.visibility='hidden'">`;
+
+/* ---------- recent-history (avoid repeats across games) ---------- */
+const RECENT_MAX = 90, RECENT_KEY = "beatArceus.recent", PREF_KEY = "beatArceus.prefs";
+const store = {
+  get(k,d){ try { const v=JSON.parse(localStorage.getItem(k)); return v==null?d:v; } catch { return d; } },
+  set(k,v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
+};
+let recentMem = store.get(RECENT_KEY, []);
+// powerups: each one is usable once per mode per (local) day
+const PU_KEY = {reroll:"beatArceus.reroll", reveal:"beatArceus.reveal"};
+const today = () => new Date().toLocaleDateString("en-CA");
+const puLeft = kind => store.get(PU_KEY[kind], {})[S.mode] !== today() && !S.used[kind];
+function usePU(kind){ const r=store.get(PU_KEY[kind], {}); r[S.mode]=today(); store.set(PU_KEY[kind], r); S.used[kind]=true; }
+function powerups(){
+  const b = (kind,label) => { const n=puLeft(kind)?1:0; return `<button class="btn rr" id="${kind}" ${n?"":"disabled"}>${label} (${n}x)</button>`; };
+  return `<div class="pu"><div class="lbl">POWERUPS</div><div class="row">${b("reroll","Reroll")}${b("reveal","Reveal")}</div></div>`;
+}
+function saveRecent(ids){ recentMem = recentMem.concat(ids).slice(-RECENT_MAX); store.set(RECENT_KEY, recentMem); }
+// pool = enabled generations, minus the boss itself, minus recently seen (if that still leaves plenty)
+function basePool(bossId){ return POOL.filter(p=>p.id!==bossId && H.gens[genOf(p.id)]); }
+function freshPool(base){ const r=new Set(recentMem); return base.filter(p=>!r.has(p.id)); }
+
+/* ---------- state ---------- */
+const $ = id => document.getElementById(id);
+const H = Object.assign({boss:0, mode:"classic", diff:"easy"}, store.get(PREF_KEY, {}));
+if (!["classic","select"].includes(H.mode)) H.mode = "classic";   // "select" = Modern
+if (!Array.isArray(H.gens) || H.gens.length!==GENS.length || !H.gens.some(Boolean)) H.gens = GENS.map(()=>true);
+if (!(H.boss>=0 && H.boss<BOSSES.length)) H.boss=0;
+let S = null;
+const boss = () => BOSSES[S ? S.boss : H.boss];
+function show(id){ if ($("tip")) $("tip").style.display="none"; document.querySelectorAll(".screen").forEach(x=>x.classList.toggle("on",x.id===id)); window.scrollTo(0,0); }
+
+/* ---------- coverflow helper ---------- */
+const flows = [];
+function bindFlow(f, onCur){
+  const fx = () => {
+    if (!f.isConnected || !f.offsetParent) return;
+    const mid=f.scrollLeft+f.clientWidth/2; let cur=0, best=1e9;
+    [...f.querySelectorAll(".slot")].forEach((slot,i)=>{
+      const c=slot.offsetLeft+slot.offsetWidth/2, d=(c-mid)/slot.offsetWidth;
+      if (Math.abs(d)<best){best=Math.abs(d);cur=i;}
+      const cl=Math.max(-1.5,Math.min(1.5,d));
+      slot.firstElementChild.style.transform=`rotateY(${-cl*35}deg) scale(${1-Math.min(Math.abs(cl),1)*.2})`;
+      slot.firstElementChild.style.opacity=1-Math.min(Math.abs(cl),1)*.45;
+      slot.style.zIndex=10-Math.round(Math.abs(d)*2);
+    });
+    onCur(cur);
+  };
+  f.addEventListener("scroll",fx,{passive:true}); f._fx=fx; flows.push(f); fx();
+}
+function goTo(f,i,instant){ const sl=f.querySelectorAll(".slot"); i=Math.max(0,Math.min(sl.length-1,i));
+  f.scrollTo({left:sl[i].offsetLeft+sl[i].offsetWidth/2-f.clientWidth/2,behavior:instant?"instant":"smooth"}); }
+window.addEventListener("resize",()=>flows.forEach(f=>f._fx&&f._fx()));
+
+/* ---------- home ---------- */
+const RULES = {
+  classic: `Assign a stat per Pokémon.`,
+  select:  `Pick a stat-Pokémon pair. Selections re-roll.`,
+};
+function renderHome(){
+  const b=BOSSES[H.boss];
+  $("title").textContent = `Beat ${b.name}`; document.title = `Beat ${b.name}`;
+  $("rules").innerHTML = `${RULES[H.mode]} Score over <b>${b.bst}</b> to beat ${b.name}.`;
+  const diff = H.mode==="select" ? "hard" : H.diff;   // Modern is hard-only; keep the saved pick for Classic
+  document.querySelectorAll("[data-gm]").forEach(x=>x.classList.toggle("on",x.dataset.gm===H.mode));
+  document.querySelectorAll("[data-df]").forEach(x=>{ x.classList.toggle("on",x.dataset.df===diff); x.disabled = H.mode==="select" && x.dataset.df==="easy"; });
+  $("diffNote").textContent = diff==="easy" ? "Change picks" : "Choices are permanent";
+  document.querySelectorAll("#bossDots i").forEach((d,i)=>d.classList.toggle("cur",i===H.boss));
+  document.querySelectorAll("[data-gen]").forEach(x=>x.classList.toggle("off",!H.gens[+x.dataset.gen]));
+  store.set(PREF_KEY, {boss:H.boss, mode:H.mode, diff:H.diff, gens:H.gens});
+}
+function buildHome(){
+  const f=$("bossFlow");
+  f.innerHTML = `<div class="spacer"></div>${BOSSES.map((b,i)=>`<div class="slot"><div class="card boss" data-boss="${i}">
+      <div class="spr">${IMG(b.id,b.name)}</div><div class="name">${b.name}</div><div class="bst">BST ${b.bst}</div></div></div>`).join("")}<div class="spacer"></div>`;
+  $("genRow").innerHTML = GENS.map((g,i)=>`<button class="btn gen" data-gen="${i}" aria-label="Generation ${i+1}">${IMG(g.icon)}Gen ${i+1}</button>`).join("");
+  $("bossDots").innerHTML = BOSSES.map((_,i)=>`<i data-boss="${i}"></i>`).join("");
+  const saved=H.boss;   // the first layout pass reads scroll 0; don't let it overwrite the saved boss
+  bindFlow(f, cur => { if (cur!==H.boss){ H.boss=cur; renderHome(); } });
+  H.boss=saved;
+}
+function goHome(){ show("home"); renderHome(); requestAnimationFrame(()=>{ goTo($("bossFlow"),H.boss,true); $("bossFlow")._fx(); }); }
+
+/* ---------- start ---------- */
+function start(){
+  const b=BOSSES[H.boss], base=basePool(b.id), fresh=freshPool(base), sel=H.mode==="select";
+  const draw = pool => sel ? drawSelect(pool,b.bst) : drawTeam(pool,b.bst);
+  // try without recent repeats first; with only a few gens on, fall back to the full filtered pool
+  const res = (fresh.length>=(sel?72:24) && draw(fresh)) || draw(base);
+  if (!res){ $("genNote").textContent = "Not enough Pokémon for a winnable game. Turn on more gens."; return; }
+  $("genNote").textContent = "";
+  S = {mode:H.mode, diff:sel?"hard":H.diff, boss:H.boss, cur:0, pools:[fresh, base], used:{reroll:false, reveal:false}, rr:null, revealed:new Set()};
+  if (sel){
+    const {grid,opt}=res;
+    Object.assign(S,{grid,opt,sel:[]});
+    saveRecent(grid.flat().map(p=>p.id));
+    grid.flat().forEach(p=>{ new Image().src=SPRITE(p.id); });
+  } else {
+    const {team,opt}=res;
+    Object.assign(S,{team,opt,pick:Array(6).fill(null)});
+    saveRecent(team.map(p=>p.id));
+    team.forEach(p=>{ new Image().src=SPRITE(p.id); });
+  }
+  $("stage").innerHTML=""; show("game"); render();
+}
+function render(){
+  if (S.mode==="select") return renderSelect();
+  if (S.diff==="hard") return renderHard();
+  renderEasy();
+}
+
+/* ---------- cards ---------- */
+// classic: one Pokémon, six stat buttons
+function pokeCard(i, hard){
+  const p=S.team[i];
+  const btns = STATS.map((n,s)=>{
+    const taken = S.pick.includes(s), sel = S.pick[i]===s;
+    const label = S.revealed.has(p.id) ? `${n} ${p.s[s]}` : n;
+    return `<button class="btn${sel?" sel":""}${taken?" taken":""}" data-i="${i}" data-s="${s}" ${hard&&taken?"disabled":""}>${label}</button>`;
+  }).join("");
+  return `<div class="card"><div class="spr">${IMG(p.id,p.name)}</div>
+    <div class="name">${p.name}</div><div class="stats">${btns}</div></div>`;
+}
+/* ---- hard: one card at a time ---- */
+function renderHard(){
+  $("progress").textContent = `${S.cur+1} / 6`;
+  $("stage").innerHTML = `<div class="pop">${pokeCard(S.cur, true)}</div>${powerups()}`;
+}
+/* ---- easy: coverflow ---- */
+function renderEasy(){
+  const done = S.pick.filter(x=>x!==null).length;
+  $("progress").textContent = `${done} / 6 assigned`;
+  const keep = $("flow") ? $("flow").scrollLeft : 0;
+  $("stage").innerHTML =
+    `<div class="flow" id="flow"><div class="spacer"></div>${[0,1,2,3,4,5].map(k=>`<div class="slot">${pokeCard(k,false)}</div>`).join("")}<div class="spacer"></div></div>
+     <div class="navs"><button class="btn" id="prev">&lt;</button><div class="dots">${[0,1,2,3,4,5].map(k=>`<i data-go="${k}" class="${S.pick[k]!==null?"done":""}"></i>`).join("")}</div><button class="btn" id="next">&gt;</button></div>
+     ${powerups()}
+     ${done===6?`<button class="btn primary" id="submit">Submit</button>`:`<div class="sub" style="height:44px">Assign all 6 to submit</div>`}`;
+  const f=$("flow"); f.scrollLeft=keep;
+  bindFlow(f, cur => { S.cur=cur; document.querySelectorAll("#stage .dots i").forEach((d,i)=>d.classList.toggle("cur",i===cur)); });
+}
+function confirmMove(text, yes, label="Switch"){
+  $("mText").innerHTML=text; $("mYes").textContent=label; $("modal").classList.add("on");
+  $("mYes").onclick=()=>{ $("modal").classList.remove("on"); yes(); };
+}
+function advanceEasy(from){
+  const nxt=[1,2,3,4,5].map(d=>(from+d)%6).find(k=>S.pick[k]===null);
+  if (nxt!==undefined) setTimeout(()=>goTo($("flow"),nxt),150);
+}
+
+// i = Pokémon index, s = stat index
+function choose(i,s){
+  const hard = S.diff==="hard";
+  if (hard){
+    if (S.pick.includes(s)) return;
+    S.pick[i]=s;
+    if (S.cur===5) return finish();
+    S.cur++; return renderHard();
+  }
+  if (S.pick[i]===s){ S.pick[i]=null; return renderEasy(); }   // tap again to clear
+  const holder = S.pick.indexOf(s);                            // Pokémon currently holding stat s
+  const assign = () => { if (holder!==-1) S.pick[holder]=null; S.pick[i]=s; renderEasy(); advanceEasy(i); };
+  if (holder!==-1 && holder!==i)
+    return confirmMove(`<b>${STATS[s]}</b> is already assigned to <b>${S.team[holder].name}</b>.<br>Move it to <b>${S.team[i].name}</b>?`, assign);
+  assign();
+}
+
+/* ---------- select mode ---------- */
+function renderSelect(){
+  const r=S.sel.length;
+  $("progress").textContent = `Round ${r+1} / 6`;
+  const chips = [0,1,2,3,4,5].map(k=>{
+    if (k<r){ const s=S.sel[k], p=S.grid[k][s]; return `<div class="chip">${IMG(p.id)}${STATS[s]}</div>`; }
+    return `<div class="chip empty">${k+1}</div>`;
+  }).join("");
+  const open = [0,1,2,3,4,5].filter(s=>!S.sel.includes(s));
+  const rows = open.map(s=>{ const p=S.grid[r][s];
+    return `<button class="btn srow" data-sel="${s}"><span class="badge">${STATS[s]}</span>${IMG(p.id,p.name)}<span>${p.name}</span>${S.revealed.has(p.id)?`<span class="val">${p.s[s]}</span>`:""}</button>`; }).join("");
+  $("stage").innerHTML = `<div class="chips">${chips}</div>
+    <div class="sub">${r===5?"Last pick. Tap to submit.":"Lock in one stat + Pokémon. The rest reroll."}</div>
+    <div class="srows pop">${rows}</div>${powerups()}`;
+}
+function chooseSelect(s){
+  if (S.sel.includes(s)) return;
+  S.sel.push(s);
+  if (S.sel.length===6) return finish();   // auto-submit
+  renderSelect();
+}
+
+/* ---------- reroll ---------- */
+function askReveal(){
+  if (!puLeft("reveal")) return;
+  const what = S.mode==="select" ? "this round's Pokémon" : `<b>${S.team[S.cur].name}</b>`;
+  confirmMove(`Reveal the stats of ${what}?<br>One reveal per day.`, () => {
+    const ps = S.mode==="select" ? [0,1,2,3,4,5].filter(s=>!S.sel.includes(s)).map(s=>S.grid[S.sel.length][s]) : [S.team[S.cur]];
+    ps.forEach(p=>S.revealed.add(p.id)); usePU("reveal"); render();
+  }, "Reveal");
+}
+function askReroll(){
+  if (!puLeft("reroll")) return;
+  const what = S.mode==="select" ? "this round's Pokémon" : `<b>${S.team[S.cur].name}</b>`;
+  confirmMove(`Reroll ${what}?<br>One reroll per day.`, doReroll, "Reroll");
+}
+function doReroll(){
+  const b=boss();
+  if (S.mode==="select"){
+    const r=S.sel.length, res=rerollSelect(S.grid, r, S.sel, S.pools, b.bst);
+    if (!res) return;
+    S.grid=res.grid; S.opt=res.opt; S.rr=r;
+    saveRecent(res.grid.slice(r).flat().map(p=>p.id));
+  } else {
+    const i=S.cur, hard=S.diff==="hard";
+    // hard: picks before this card are locked, cards after it are unseen; easy: nothing is locked
+    const fixed = S.pick.map((s,k)=> hard ? s : null); fixed[i]=null;
+    const res=rerollTeam(S.team, i, fixed, S.pools, b.bst, hard ? i+1 : 6);
+    if (!res) return;
+    S.team=res.team; S.opt=res.opt; S.rr=i; S.pick[i]=null;
+    saveRecent(S.team.map(p=>p.id));
+  }
+  usePU("reroll"); render();
+}
+
+/* ---------- results ---------- */
+function finish(){
+  const b=boss();
+  const total = S.mode==="select"
+    ? S.sel.reduce((a,s,r)=>a+S.grid[r][s].s[s],0)
+    : S.team.reduce((a,p,i)=>a+p.s[S.pick[i]],0);
+  const win = total>b.bst; S.total=total;
+  $("rVerdict").textContent = win ? `You beat ${b.name}!` : `${b.name} wins`;
+  $("rVerdict").className = "verdict "+(win?"win":"lose");
+  $("rScore").textContent = `${total} pts vs ${b.bst} pts`;
+  $("rOpt").textContent = `(Optimal: ${S.opt.score} pts)`;
+  S.mode==="select" ? breakdownSelect() : breakdownTeam();
+  show("breakdown");
+}
+function breakdownTeam(){
+  $("bBody").innerHTML = `<div class="grid">${S.team.map((p,i)=>`<div class="bd">${IMG(p.id)}
+    <div class="bars"><div class="nm">${p.name}${S.rr===i?` <span class="rrm">↻</span>`:""}</div>${STATS.map((n,s)=>
+      `<div class="bar${S.pick[i]===s?" pick":""}${S.opt.assign[i]===s?" opt":""}"><span>${n}</span><div class="tr"><div class="fl" style="width:${p.s[s]/255*100}%"></div></div><span>${p.s[s]}</span></div>`
+    ).join("")}</div></div>`).join("")}</div>`;
+  $("bLegend").innerHTML = `<span class="lp">your pick</span><span class="lo">optimal pick</span>${S.rr!==null?`<span>↻ rerolled</span>`:""}`;
+}
+function breakdownSelect(){
+  // rows = rounds, cols = stats; a cell was offered to you only if that stat was still open in that round
+  let h = `<div class="sg"><div></div>${STATS.map(n=>`<div class="h">${n}</div>`).join("")}`;
+  for (let r=0;r<6;r++){
+    h += `<div class="h">R${r+1}${S.rr===r?`<span class="rrm">↻</span>`:""}</div>`;
+    for (let s=0;s<6;s++){
+      const p=S.grid[r][s], seen=!S.sel.slice(0,r).includes(s);
+      const cls = (S.sel[r]===s?" pick":"") + (S.opt.assign[r]===s?" opt":"") + (seen?"":" un");
+      h += `<div class="sc${cls}" data-tip="${p.name}">${IMG(p.id,p.name)}<span>${p.s[s]}</span></div>`;
+    }
+  }
+  h += `</div>`;
+  $("bBody").innerHTML = h;
+  $("bLegend").innerHTML = `<span class="lp">your pick</span><span class="lo">optimal pick</span><span class="lu">not offered to you</span>${S.rr!==null?`<span>↻ rerolled</span>`:""}`;
+}
+
+/* ---------- events ---------- */
+document.addEventListener("click",e=>{
+  const t=e.target.closest("button,[data-go],[data-boss]"); if(!t) return;
+  if (t.dataset.boss!==undefined){ const i=+t.dataset.boss; if(i!==H.boss){ H.boss=i; renderHome(); } return goTo($("bossFlow"),i); }
+  if (t.dataset.gm) { H.mode=t.dataset.gm; return renderHome(); }
+  if (t.dataset.df) { H.diff=t.dataset.df; return renderHome(); }
+  if (t.dataset.gen!==undefined){ const g=+t.dataset.gen;
+    if (H.gens[g] && H.gens.filter(Boolean).length===1){ $("genNote").textContent="Keep at least one gen on."; return; }
+    H.gens[g]=!H.gens[g]; $("genNote").textContent=""; return renderHome(); }
+  if (t.dataset.sel!==undefined) return chooseSelect(+t.dataset.sel);
+  if (t.dataset.s!==undefined) return choose(+t.dataset.i,+t.dataset.s);
+  if (t.dataset.go!==undefined) return goTo($("flow"),+t.dataset.go);
+  switch(t.id){
+    case "play": return start();
+    case "prev": return goTo($("flow"),S.cur-1);
+    case "next": return goTo($("flow"),S.cur+1);
+    case "submit": return finish();
+    case "reroll": return askReroll();
+    case "reveal": return askReveal();
+    case "mNo": return $("modal").classList.remove("on");
+    case "again": H.boss=S.boss; return start();
+    case "quit": case "quitGame": return goHome();
+  }
+});
+document.addEventListener("keydown",e=>{
+  if (e.key!=="ArrowLeft" && e.key!=="ArrowRight") return;
+  const d = e.key==="ArrowLeft"?-1:1;
+  if ($("home").classList.contains("on")) return goTo($("bossFlow"),H.boss+d);
+  if (S && $("game").classList.contains("on") && S.diff==="easy" && $("flow")) goTo($("flow"),S.cur+d);
+});
+
+/* ---------- tooltip: hover with a mouse, tap on touch ---------- */
+let tipTimer=0;
+function showTip(el){
+  const t=$("tip"); t.textContent=el.dataset.tip; t.style.display="block";
+  const r=el.getBoundingClientRect(), w=t.offsetWidth, h=t.offsetHeight;
+  const x=Math.max(4, Math.min(document.documentElement.clientWidth-w-4, r.left+r.width/2-w/2));
+  t.style.left=(x+window.scrollX)+"px"; t.style.top=(r.top+window.scrollY-h-6)+"px";
+}
+const hideTip=()=>{ $("tip").style.display="none"; };
+document.addEventListener("pointerover",e=>{ if(e.pointerType!=="mouse") return; const el=e.target.closest("[data-tip]"); el ? showTip(el) : hideTip(); });
+document.addEventListener("pointerdown",e=>{ if(e.pointerType==="mouse") return; const el=e.target.closest("[data-tip]");
+  clearTimeout(tipTimer); if(!el) return hideTip(); showTip(el); tipTimer=setTimeout(hideTip,2000); });
+window.addEventListener("scroll",hideTip,{passive:true});
+
+buildHome(); goHome();
+</script>
+
+</body></html>
